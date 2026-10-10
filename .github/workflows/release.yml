@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to upload to PyPI'
+        required: true
+        default: "no"
+
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------ #
+  # 1. Build, and attach the artifacts to a GitHub Release on a tag push.
+  # ------------------------------------------------------------------ #
+  build:
+    name: Build and attach
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Resolve the tag being released
+        id: ref
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+            if [ -z "$tag" ]; then
+              echo "no v* tag found; tag a release before publishing" >&2
+              exit 1
+            fi
+            echo "manual dispatch: building $tag"
+            git checkout --detach "refs/tags/$tag"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag push: building ${{ github.ref_name }}"
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the build tools
+        run: |
+          python -m pip install --upgrade pip build twine
+
+      - name: Build
+        run: python -m build
+
+      - name: Check the artifacts
+        run: |
+          twine check dist/*
+          python scripts/check_wheel.py dist
+
+      - name: Verify the tests pass on the tagged commit
+        run: |
+          pip install -e ".[dev]"
+          pytest -q
+
+      - name: Attach the artifacts to the GitHub Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          generate_release_notes: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # ------------------------------------------------------------------ #
+  # 2. Publish to PyPI. Manual only, and only with an explicit confirmation.
+  #
+  # A tag push deliberately does NOT publish. PyPI is a one-way door: a
+  # released version can be yanked, never replaced. So the tag builds and
+  # attaches, and a human decides when the irreversible step happens.
+  #
+  # Uses trusted publishing over OIDC -- no API token is stored anywhere.
+  # Configure the publisher at https://pypi.org/manage/account/publishing/
+  # ------------------------------------------------------------------ #
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      && github.event.inputs.confirm == 'publish'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/gimacpay
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: List what is about to be published
+        run: ls -la dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

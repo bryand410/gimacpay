@@ -1,0 +1,2424 @@
+openapi: 3.0.3
+info:
+  title: GIMACPay Swagger for payments issuers 1.8
+  description: |-
+    The following swagger file describe the API used by issuer to send payments accros the GIMACPay network. Participants can use the following swagger to carry tests while in development. If they want to receive payments they need to communicate their incoming endpoints to GIMAC and they will be configured on the corresponding test server
+
+  termsOfService: https://gimac-afr.com/
+  contact:
+    email: info@gimac-afr.org
+  license:
+    name: Private
+    url: https://gimac-afr.com/#
+  version: '1.8'
+servers:
+  - url: http://localhost:8005/stdendpointfacade/v1/external
+
+paths:
+  /payment/inquiry:
+    post:
+      tags:
+        - payment
+      summary: Send a new payment
+      description: Endpoint used to send a new payment in the GIMACPay's network
+      operationId: paymentInquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInquiryRequest'
+
+                
+      responses:
+        '200':
+          description: Successfull request, payments information will be in the json array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'          
+        '400':
+          description: Invalid request or no payment found the given criterias
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http400Response'
+        '401':
+          description: No or invalid access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http401Response'
+        '403':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http403Response'
+  
+      security:
+        - gimac_pay_auth:
+            - read:payment
+  
+  /payment/send:
+    post:
+      tags:
+        - payment
+      summary: Send a new payment
+      description: Endpoint used to send a new payment in the GIMACPay's network
+      operationId: sendPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CardlessRequest'
+                - $ref: '#/components/schemas/OutgoingRemittenceToAccountRequest'
+                - $ref: '#/components/schemas/WalletToWalletRequest'
+                - $ref: '#/components/schemas/PrepaidCardReloadRequest'
+                - $ref: '#/components/schemas/PurchaseVoucherRequest'
+                - $ref: '#/components/schemas/CashOutRequest'
+                - $ref: '#/components/schemas/MerchantPurchaseRequest'
+                - $ref: '#/components/schemas/WalletIncomingRemittenceRequest'
+                - $ref: '#/components/schemas/CashIncomingRemittenceRequest'
+                - $ref: '#/components/schemas/OutgoingRemittenceToCardRequest'
+                - $ref: '#/components/schemas/OutgoingRemittenceToWalletRequest'
+                - $ref: '#/components/schemas/AccountIncomingRemittenceRequest'
+                - $ref: '#/components/schemas/BillInquiryRequest'
+                - $ref: '#/components/schemas/BillPaymentRequest'
+                - $ref: '#/components/schemas/MobileReloadRequest'
+                - $ref: '#/components/schemas/WalletToIbanRequest'
+                - $ref: '#/components/schemas/IbanToIbanRequest'
+                - $ref: '#/components/schemas/IbanToWalletRequest'
+                - $ref: '#/components/schemas/CardIncomingRemittenceRequest'
+                - $ref: '#/components/schemas/CashOutgoingRemittenceRequest'
+                - $ref: '#/components/schemas/CashDepositRequest'
+                - $ref: '#/components/schemas/CashInToWalletRequest'
+                - $ref: '#/components/schemas/RequestToPayRequest'
+                - $ref: '#/components/schemas/AccountInquiryRequest'
+            examples:
+              CardlessWithdrawalRequestExample:
+                $ref: "#/components/examples/CardlessWithdrawalRequestExample"
+              CashIncomingRemittenceRequestExample:
+                $ref: "#/components/examples/CashIncomingRemittenceRequestExample"
+              WalletToWalletRequestExample:
+                $ref: "#/components/examples/WalletToWalletRequestExample"
+              BillInquiryRequestExample:
+                $ref: "#/components/examples/BillInquiryRequestExample"
+              BillPaymentRequestExample:
+                $ref: "#/components/examples/BillPaymentRequestExample"
+              MerchantPurchaseRequestExample:
+                $ref: "#/components/examples/MerchantPurchaseRequestExample"
+              PrepaidCardReloadRequestExample:
+                $ref: "#/components/examples/PrepaidCardReloadRequestExample"
+              AccountIncomingRemittenceRequestExample:
+                $ref: "#/components/examples/AccountIncomingRemittenceRequestExample"
+              OutgoingRemittenceToAccountRequestExample:
+                $ref: "#/components/examples/AccountOutgoingRemittenceRequestExample"
+              WalletIncomingRemittenceRequestExample:
+                $ref: "#/components/examples/WalletIncomingRemittenceRequestExample"
+              CardOutgoingRemittenceRequestExample:
+                $ref: "#/components/examples/CardOutgoingRemittenceRequestExample"
+              PurchaseVoucherRequestExample:
+                $ref: "#/components/examples/PurchaseVourcherRequestExample"
+              CashoutRequestExample:
+                $ref: "#/components/examples/CashoutRequestExample"
+              MobileReloadRequestExample:
+                $ref: "#/components/examples/MobileReloadRequestExample"
+              WalletToIbanRequestExample:
+                $ref: "#/components/examples/WalletToIbanRequestExample"
+              IbanToIbanRequestExample:
+                $ref: "#/components/examples/IbanToIbanRequestExample"
+              IbanToWalletRequestExample:
+                $ref: "#/components/examples/IbanToWalletRequestExample"
+              CardIncomingRemittenceRequestExample:
+                $ref: "#/components/examples/CardIncomingRemittenceRequestExample"
+              CashOutgoingRemittenceRequestExample:
+                $ref: "#/components/examples/CashOutgoingRemittenceRequestExample"
+              CashDepositRequestExample:
+                $ref: "#/components/examples/CashDepositRequestExample"
+              CashInToWalletRequestExample:
+                $ref: "#/components/examples/CashInToWalletRequestExample"
+              RequestToPayRequestExample:
+                $ref: "#/components/examples/RequestToPayRequestExample"
+              AccountInquiryRequestToWalletExample:
+                $ref: "#/components/examples/AccountInquiryRequestToWalletExample"
+              AccountInquiryRequestToAccountExample:
+                $ref: "#/components/examples/AccountInquiryRequestToAccountExample"
+
+                
+      responses:
+        '200':
+          description: ACCEPTED or PENDING payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'          
+        '400':
+          description: Payment REJECTED, the reject reason is in error_description field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http400Response'
+        '401':
+          description: Payment REJECTED due to No or invalid access token provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http401Response'
+        '403':
+          description: Payment REJECTED due to Unauthorized access. Check if the source IP adress is authorized on GIMACPay's server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http403Response'
+        'x-*':
+          description: For all other responses codes, participants should keep the payment in PENDING state and perform a payment inquiry to GET the state. Participants should not guest the state if it's not given by GIMACPay
+      security:
+        - gimac_pay_auth:
+            - read:payment
+  /payment/update:
+    post:
+      tags:
+        - payment
+      summary: Send a new payment
+      description: Endpoint used to send a new payment in the GIMACPay's network
+      operationId: updatePayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+      responses:
+        '200':
+          description: ACCEPTED or PENDING payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http400Response'          
+        '401':
+          description: Bad or expired access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http401Response'
+        '403':
+          description: Payment REJECTED due to Unauthorized access. Check if the source IP adress is authorized on GIMACPay's server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Http403Response'
+      security:
+        - gimac_pay_auth:
+            - read:payment
+  
+  
+components:
+  
+  examples:
+    CardlessWithdrawalRequestExample:
+      value:
+        intent: cardless_withdrawal
+        amount: 50000
+        issuertrxref: "133759595959595"
+        currency: "950"
+        sendermobile: "2359889000"
+        receivermobile: "23767879000"
+        validityduration: 900
+    
+    AccountInquiryRequestToWalletExample:
+      value:
+        intent: account_inquiry
+        walletdestination: 237699947943
+        issuertrxref: 475214752224
+        tomember: 12001
+    
+    AccountInquiryRequestToAccountExample:
+      value:
+        intent: account_inquiry
+        dstaccounts:
+          - iden: "100297474748990"
+            type: "CARD"
+        issuertrxref: 475214752224
+        tomember: 12001
+        
+    WalletToWalletRequestExample:
+      value:
+        intent: mobile_transfer
+        amount: 500
+        currency: "950"
+        issuertrxref: "133759595959595"
+        walletsource: "2356789009"
+        walletdestination: "237699947943"
+        tomember: "22001"
+        description: "John Doe refund"
+        
+    MerchantPurchaseRequestExample:
+      value:
+        intent: merchant_purchase
+        amount: 500
+        currency: "950"
+        issuertrxref: "133759595959595"
+        walletsource: "2356789009"
+        walletdestination: "768960"
+        tomember: "22001"
+        description: "Air Jordan purchase at Casino"
+        
+    BillInquiryRequestExample:
+      value:
+        intent: bill_inquiry
+        tomember: "13001"
+        issuertrxref: "133759595959595"
+        walletsource: "237699947943"
+        billInquiryData:
+          queryRef: "CTR_REF"
+          contractRef: "1248899R78FDF"
+          serviceRef: "SRV_001"
+          
+    BillPaymentRequestExample:
+      value:
+        intent: bill_payment
+        issuertrxref: "133759595959595"
+        walletsource: "237699947943"
+        tomember: "13001"
+        amount: 7500
+        currency: "950"
+        service: "SRV_001"
+        billList:
+          - billRef: "S-112-950-ENEO-10039-b187b7f828cd42af9123817cca17c93f-6217b47dfb1f4fdfa8553adc1f3015c6"
+          
+    PrepaidCardReloadRequestExample:
+      value:
+        intent: pp_reload
+        walletsource: "237699947943"
+        dstaccounts: 
+          - iden: "100297474748990"
+            type: "CARD"
+        tomember: "10029"
+        amount: 4500
+        currency: "950"
+        issuertrxref: "4575759558958595050"
+    
+    AccountIncomingRemittenceRequestExample:
+      value:
+        intent: inc_acc_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        dstaccounts:
+          - iden: "100291525478502"
+            type: "ACCOUNT"
+        tomember: "10029"
+        amount: 750
+        currency: "950"
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+    
+    CardIncomingRemittenceRequestExample:
+      value:
+        intent: inc_card_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        dstaccounts:
+          - iden: "100291525478502"
+            type: "CARD"
+        tomember: "10029"
+        amount: 750
+        currency: "950"
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+          
+    AccountOutgoingRemittenceRequestExample:
+      value:
+        intent: outg_acc_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        dstaccounts:
+          - iden: "100291525478502"
+            type: "ACCOUNT"
+        tomember: "10029"
+        amount: 750
+        currency: "950"
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+            
+    CardOutgoingRemittenceRequestExample:
+      value:
+        intent: outg_card_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        dstaccounts:
+          - iden: "100291525478502"
+            type: "ACCOUNT"
+        tomember: "10029"
+        amount: 750
+        currency: "950"
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+            
+    WalletIncomingRemittenceRequestExample:
+      value:
+        intent: inc_wal_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        walletdestination: "237699947943"
+        tomember: "10029"
+        amount: 750
+        currency: "950"
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+    
+    CashIncomingRemittenceRequestExample:
+      value:
+        intent: inc_voucher_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+336575950505"
+        amount: 75000
+        currency: "950"
+        validityduration: 4500
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+            
+    CashOutgoingRemittenceRequestExample:
+      value:
+        intent: outg_voucher_remit
+        issuertrxref: "5575959595055005"
+        sendermobile: "+2367890899"
+        amount: 75000
+        currency: "950"
+        validityduration: 4500
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+        sendercustomerdata:
+          - firstname: "Infinte"
+            secondname: "Game machine"
+            idnumber: "10945888"
+            idtype: "National ID"
+            
+    CashDepositRequestExample:
+      value:
+        intent: cash_deposit
+        issuertrxref: "5575959595055005"
+        walletdestination: "2367890899"
+        amount: 75000
+        tomember: "22001"
+        currency: "950"
+        
+    CashInToWalletRequestExample:
+      value:
+        intent: cash_in
+        issuertrxref: "5575959595055005"
+        walletdestination: "2367890899"
+        amount: 75000
+        tomember: "22001"
+        currency: "950"
+        teller: "T001"
+        pointofservice: "BSIC_BANGUI"
+        
+    RequestToPayRequestExample:
+      value:
+        intent: request_to_pay
+        issuertrxref: "5575959595055005"
+        walletdestination: "2367890899"
+        walletsource: "10001LMG"
+        amount: 75000
+        tomember: "22001"
+        currency: "950"
+    
+    PurchaseVourcherRequestExample:
+      value:
+        intent: purchase_voucher
+        issuertrxref: "5575959595055005"
+        walletsource: "677457857"
+        description: "1xbet bet for Cameroon vs Sénégal"
+        amount: 75000
+        currency: "950"
+        validityduration: 4500
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+            merchantid: "MERCH001"
+              
+    CashoutRequestExample:
+      value:
+        intent: cash_out
+        issuertrxref: "5575959595055005"
+        walletsource: "677457857"
+        amount: 75000
+        currency: "950"
+        validityduration: 4500
+        receivercustomerdata:
+          - firstname: "Lara"
+            secondname: "James"
+            merchantid: "MERCH003"
+            
+    MobileReloadRequestExample:
+      value:
+        intent: mobile_reload
+        issuertrxref: "5575959595055005"
+        sendermobile: "677457857"
+        receivermobile: "677678789"
+        tomember: "12101"
+        amount: 700
+        currency: "950"
+        
+    WalletToIbanRequestExample:
+      value:
+        intent: wallet_to_account
+        issuertrxref: "5575959595055005"
+        walletsource: "677678789"
+        tomember: "10001"
+        amount: 700
+        currency: "950"
+        dstaccounts:
+          - iden: 100291525478502
+            type: "ACCOUNT"
+            
+    IbanToIbanRequestExample:
+      value:
+        intent: account_transfer
+        issuertrxref: "5575959595055005"
+        tomember: "10029"
+        amount: 700
+        currency: "950"
+        dstaccounts:
+          - iden: 100291525478502
+            type: "ACCOUNT"
+        srcaccounts:
+          - iden: 1000149505050
+            type: "ACCOUNT"
+            
+    IbanToWalletRequestExample:
+      value:
+        intent: account_to_wallet
+        issuertrxref: "5575959595055005"
+        walletdestination: "677678789"
+        tomember: "10001"
+        amount: 700
+        currency: "950"
+        srcaccounts:
+          - iden: 100291525478502
+            type: "ACCOUNT"
+    
+    
+    
+  schemas:
+    
+    #requests
+    
+    PaymentInquiryRequest:
+      type: object
+      properties:
+        asissuer:
+          type: boolean
+          example: true
+          description: only return payments where the sender of the request is issuer
+        asacquirer:
+          type: boolean
+          example: false
+          description: only return payments where the sender of the request is acquirer
+        firstelement:
+          type: integer
+          example: 20
+          description: First element index to be return (used for pagination)
+        pagesize:
+          type: integer
+          example: 10
+          description: How many records to return per call (used for pagination)
+        acquirertrxref:
+          type: string
+          maxLength: 20
+          example: CI20230929.1506.ADFDF
+        vouchercode:
+          type: string
+          minLength: 12
+          maxLength: 12
+          example: ack67fje4598
+        state:
+          type: array
+          items:
+            type: string
+            enum:
+              - ACCEPTED
+              - REJECTED
+              - PENDING
+              - REVERSED
+              - EXPIRED
+              - CANCELLED
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intents:
+            type: string
+            enum:
+              - mobile_transfer
+              - merchant_purchase
+              - inc_wal_remit
+              - cardless_withdrawal
+              - bill_inquiry
+              - bill_payment
+              - cash_out
+              - purchase_voucher
+              - pp_reload
+              - inc_acc_remit
+              - inc_card_remit
+              - inc_voucher_remit
+              - outg_acc_remit
+              - outg_card_remit
+              - outg_wal_remit
+              - outg_voucher_remit
+              - cash_deposit
+              - cash_in
+              - wallet_to_account
+              - account_to_wallet
+              - account_transfer
+              - wallet_to_account
+              - request_to_pay
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: Only return payments sent to this member
+        frommember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: Only return payments issued by this member
+        fromdate:
+          type: string
+          format: timestamp
+          example: 1490109044
+          description: Only return payments starting from this date
+        todate:
+          type: string
+          format: timestamp
+          example: 1490109044
+          description: Only return payments created before this date
+    
+    OutgoingRemittenceToWalletRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: outg_wal_remit
+          enum:
+            - outg_wal_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 234789789089
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - tomember  
+        - walletdestination
+    
+    OutgoingRemittenceToCardRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: outg_card_remit
+          enum:
+            - outg_acc_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        dstaccounts:
+          type: array
+          items:
+            type: object
+            properties:
+              iden:
+                type: string
+                maxLength: 60
+                example: 5028820194849490
+              type:
+                type: string
+                maxLength: 60
+                enum:
+                  - CARD
+                example: CARD
+          minItems: 1
+          maxItems: 1
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - tomember  
+        - dstaccounts
+    
+    OutgoingRemittenceToAccountRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: outg_acc_remit
+          enum:
+            - outg_acc_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        dstaccounts:
+          type: array
+          items:
+            type: object
+            properties:
+              iden:
+                type: string
+                maxLength: 60
+                example: 5028820194849490
+              type:
+                type: string
+                maxLength: 60
+                enum:
+                  - ACCOUNT
+                example: ACCOUNT
+          minItems: 1
+          maxItems: 1
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - tomember  
+        - dstaccounts
+        
+    CashOutgoingRemittenceRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: outg_voucher_remit
+          enum:
+            - outg_voucher_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        sendermobile:
+          type: string
+          maxLength: 20
+          example: +33699947943
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the payment will be in PENDING state. If GIMACPay does not receive an update from the acquirer within this time, the payment will be set as expired and the acquirer and issuer will be notified about that
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - sendermobile
+        - walletdestination
+        - tomember  
+    
+    CashIncomingRemittenceRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: inc_voucher_remit
+          enum:
+            - inc_voucher_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        sendermobile:
+          type: string
+          maxLength: 20
+          example: +33699947943
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the payment will be in PENDING state. If GIMACPay does not receive an update from the acquirer within this time, the payment will be set as expired and the acquirer and issuer will be notified about that
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - sendermobile
+        - walletdestination
+        - tomember  
+    
+    AccountInquiryRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: account_inquiry
+          enum:
+            - account_inquiry
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+          description: The wallet to which you want to get the information
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        dstaccounts:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/AccountInfo'
+            example:
+              type: "ACCOUNT"
+              iden: "10029123458899"
+          minItems: 1
+          maxItems: 1
+          
+      required:
+        - issuertrxref
+        - intent
+        - walletdestination
+        - tomember  
+
+    
+    WalletIncomingRemittenceRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: inc_wal_remit
+          enum:
+            - merchant_purchase
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        sendermobile:
+          type: string
+          maxLength: 20
+          example: +33699947943
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendercustomerdata
+        - receivercustomerdata
+        - sendermobile
+        - walletdestination
+        - tomember
+    
+    MerchantPurchaseRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: merchant_purchase
+          enum:
+            - merchant_purchase
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the payment will be in PENDING state. If GIMACPay does not receive an update from the acquirer within this time, the payment will be set as expired and the acquirer and issuer will be notified about that
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - walletdestination
+        - tomember
+
+    WalletToWalletRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: mobile_transfer
+          enum:
+            - mobile_transfer
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: Remboursement Christian
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the payment will be in PENDING state. If GIMACPay does not receive an update from the acquirer within this time, the payment will be set as expired and the acquirer and issuer will be notified about that
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - walletdestination
+        - tomember
+        
+    PurchaseVoucherRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - receivercustomerdata
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: purchase_voucher
+          enum:
+            - purchase_voucher
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the member where the voucher should be withdrawn if not set the voucher can be withdrawn on all GIMACPay's ATM Network
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the voucher will be valid. If not set the voucher is indefinitely valid
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+  
+    PrepaidCardReloadRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: pp_reload
+          enum:
+            - pp_reload
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Card reload for online payment
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of card issuing BANK
+        dstaccounts:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/AccountInfo'
+            example:
+              type: "CARD"
+              iden: "10029123458899"
+          minItems: 1
+          maxItems: 1
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 234789789089
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - dstaccounts
+        - tomember  
+
+    CardIncomingRemittenceRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: inc_card_remit
+          enum:
+            - inc_card_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Incoming remittence to my grandma account
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of card issuing BANK
+        dstaccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInfo'
+          minItems: 1
+          maxItems: 1
+        sendercustomerdata:
+          $ref: "#/components/schemas/CustomerData"
+        receivercustomerdata:
+          $ref: "#/components/schemas/CustomerData"
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - dstaccounts
+        - tomember
+        - sendercustomerdata
+        - receivercustomerdata
+  
+    BillInquiryRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: bill_inquiry
+          enum:
+            - bill_inquiry
+        walletsource:
+          type: string
+          maxLength: 20
+          description: Wallet identifier of the customer intiating the bill inquiry
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        billInquiryData:
+          type: object
+          $ref: "#/components/schemas/BillInquiryData"
+          
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - dstaccounts
+        - tomember
+        - sendercustomerdata
+        - receivercustomerdata
+
+    BillPaymentRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: bill_inquiry
+          enum:
+            - bill_inquiry
+        walletsource:
+          type: string
+          maxLength: 20
+          description: Wallet identifier of the customer intiating the bill inquiry
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        tomember:
+          type: string
+          format: string
+          example: 13001
+          description: GIMACPay identifier for the biller
+        billList:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/Bill"
+          minItems: 1
+          maxItems: 1
+          
+        billInquiryData:
+          type: object
+          $ref: "#/components/schemas/BillInquiryData"
+          
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - dstaccounts
+        - tomember
+        - sendercustomerdata
+        - receivercustomerdata
+
+    AccountIncomingRemittenceRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: inc_acc_remit
+          enum:
+            - inc_acc_remit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        description:
+          type: string
+          maxLength: 255
+          example: Incoming remittence to my grandma account
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of card issuing BANK
+        dstaccounts:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/AccountInfo'
+            example:
+              type: "ACCOUNT"
+              iden: "10029123458899"
+          minItems: 1
+          maxItems: 1
+        sendercustomerdata:
+          type: object
+          $ref: "#/components/schemas/CustomerData"
+        receivercustomerdata:
+          type: object
+          $ref: "#/components/schemas/CustomerData"
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - dstaccounts
+        - tomember
+        - sendercustomerdata
+        - receivercustomerdata
+
+    CashOutRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - receivercustomerdata
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: cash_out
+          enum:
+            - cash_out
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the member where the voucher should be withdrawn if not set the voucher can be withdrawn on all GIMACPay's ATM Network
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the voucher will be valid. If not set the voucher is indefinitely valid
+        receivercustomerdata:
+          $ref: '#/components/schemas/CustomerData'
+    
+    CardlessRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - receivermobile
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: cardless_withdrawal
+          enum:
+            - cardless_withdrawal
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        sendermobile:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        receivermobile:
+          type: string
+          maxLength: 20
+          example: 237674925917
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the member where the voucher should be withdrawn if not set the voucher can be withdrawn on all GIMACPay's ATM Network
+        validityduration:
+          type: integer
+          example: 3600
+          default: 0
+          description: The number of seconds for which the voucher will be valid. If not set the voucher is indefinitely valid
+    
+    MobileReloadRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - sendermobile
+        - tomember
+        - receivermobile
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: mobile_reload
+          enum:
+            - mobile_reload
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        sendermobile:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        receivermobile:
+          type: string
+          maxLength: 20
+          example: 237674925917
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: Gimac Code of the biller offering the service
+        sendercustomerdata:
+          $ref: '#/components/schemas/CustomerData'   
+          
+    WalletToIbanRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - dstaccounts
+        - tomember
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: wallet_to_account
+          enum:
+            - wallet_to_account
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 10001
+        dstaccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInfo'   
+            
+    IbanToIbanRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - dstaccounts
+        - srcaccounts
+        - tomember
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: account_transfer
+          enum:
+            - account_transfer
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletsource:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 10001
+        srcaccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountInfo"
+        dstaccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInfo'   
+       
+    IbanToWalletRequest:
+      type: object
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletsource
+        - walletdestination
+        - tomember
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 123456889988
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: account_to_wallet
+          enum:
+            - account_to_wallet
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletdestination:
+          type: string
+          maxLength: 20
+          example: 237699947943
+        description:
+          type: string
+          maxLength: 255
+          example: A voucher for a friend
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 10001
+        srcaccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountInfo"
+    
+    CashDepositRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: cash_deposit
+          enum:
+            - cash_deposit
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletdestination:
+          type: integer
+          maxLength: 20
+          example: 237699947943
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletdestination
+        - tomember 
+        
+    CashInToWalletRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: cash_in
+          enum:
+            - cash_in
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletdestination:
+          type: integer
+          maxLength: 20
+          example: 237699947943
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+        teller:
+          type: string
+          maxLength: 255
+          example: "CAISSE-001"
+          description: "Teller unique identifier"
+        pointofservice:
+          type: string
+          maxLength: 255
+          example: "AGENCE LIBERTE"
+          description: "Agency name or identifier"
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletdestination
+        - tomember 
+        - teller
+        - pointofservice
+    
+    RequestToPayRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: request_to_pay
+          enum:
+            - request_to_pay
+        createtime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        walletdestination:
+          type: integer
+          maxLength: 20
+          example: 237699947943
+        walletsource:
+          type: integer
+          maxLength: 20
+          example: 008799
+          description: "Merchant unique indentication in issuer system"
+        amount:
+          type: number
+          format: int64
+          example: 50000
+        currency:
+          type: integer
+          description: Iso code for XAF
+          enum:
+            - 950
+          example: 950
+        tomember:
+          type: string
+          minLength: 5
+          maxLength: 5
+          example: 12002
+          description: GIMACPay code of the wallet manager member
+      required:
+        - issuertrxref
+        - intent
+        - amount
+        - currency
+        - walletdestination
+        - walletsource
+        - tomember 
+    
+    #update requests
+    UpdateRequest:
+      type: object
+      properties:
+        issuertrxref:
+          type: integer
+          format: integer
+          example: 1234578999
+          maxLength: 20
+        intent:
+          type: string
+          description: Service identifier
+          example: inc_wal_remit
+          enum:
+              - mobile_transfer
+              - merchant_purchase
+              - inc_wal_remit
+              - cardless_withdrawal
+              - bill_inquiry
+              - bill_payment
+              - cash_out
+              - purchase_voucher
+              - pp_reload
+              - inc_acc_remit
+              - inc_card_remit
+              - inc_voucher_remit
+              - outg_acc_remit
+              - outg_card_remit
+              - outg_wal_remit
+              - outg_voucher_remit
+              - cash_deposit
+              - cash_in
+              - wallet_to_account
+              - account_to_wallet
+              - account_transfer
+              - wallet_to_account
+              - request_to_pay
+        state:
+          type: string
+          description: new transaction state
+          enum:
+            - ACCEPTED
+            - REJECTED
+            - CANCELLED
+        vouchercode:
+          type: string
+          description: Provided by GIMAC
+          maxLength: 12
+        atm:
+          type: string
+          description: Identifier of ATM, provided in case of cardless withdrawal
+        bank: 
+          type: string
+          description: Identifier of acquiring bank, provided in case of a cardless withdrawal
+          example: 12002
+        teller:
+          type: string
+          description: Unique identifier of the teller in acquirer's system
+          example: TEL001
+          maxLength: 255
+        acquirertrxref:
+          type: string
+          maxLength: 20
+          description: Unique indentifier of the transaction in acquirer's system
+          example: "1235874520457"
+        updatetime:
+          type: string
+          format: timestamp
+          example: 1490109044
+        pointofservice:
+          type: string
+          description: Unique identifier of the point of service in acquirer's system
+          maxLength: 255
+      required:
+        - intent
+        - state
+        - acquirertrxref
+        - vouchercode
+
+  
+    #Nested objects
+    AccountInfo:
+      type: object
+      properties:
+        type:
+          type: string
+          maxLength: 60
+          enum:
+            - ACCOUNT
+            - IBAN
+            - CARD
+        iden:
+          type: string
+          maxLength: 60
+          
+    
+    CustomerData:
+      type: object
+      properties:
+        firstname:
+          type: string
+          maxLength: 255
+        secondname:
+          type: string
+          maxLength: 255
+        middlename:
+          type: string
+          maxLength: 255
+        idtype:
+          type: string
+          maxLength: 255
+        idnumber:
+          type: string
+          maxLength: 255
+        address:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 255
+        merchantid:
+          type: string
+          maxLength: 255
+    
+            
+    BillInquiryData:
+      type: object
+      properties:
+        contractRef:
+          type: string
+          format: string
+          example: 1234578999878908766
+          maxLength: 255
+        billRef:
+          type: string
+          format: string
+          example: S01-12948447949494-202234
+          maxLength: 255
+          description: This is speicified if the billinquiry is done on a specific bill
+        serviceRef:
+          type: string
+          description: "unique identifier of the service \n 
+            - SRV_001: Postpaid Electricity bills in Cameroon\n
+            - SRV_002: Canal+ Bill Payment in Cameroon\n
+            - SRV_003: Postpaid Water Bill Payment in Cameroon\n
+            - srv_guce_001: Cameroon Government tax"
+          enum:
+            - SRV_001
+            - SRV_002
+            - SRV_003
+            - srv_guce_001
+        queryRef:
+          type: string
+          description: Service reference
+          example: "CTR_REF"
+          enum:
+            - CTR_REF
+            - CUST_REF
+            - BILL_REF
+        billStatus:
+          type: string
+          maxLength: 1
+          description: "Specify the state of the bills to display \n
+            - P: Show only Paid bills \n
+            - U: Show only unpaid bills \n
+            - A: Show all bils"
+          enum:
+            - P
+            - U
+            - A
+      required:
+        - queryRef
+        - contractRef
+        - serviceRef
+
+    Http400Response:
+        type: object
+        properties:
+          error:
+            type: string
+            maxLength: 255
+            example: 404
+          error_description:
+            type: string
+            maxLength: 255
+            example: Wallet<34JDJFKDKJDF> Not Found
+    
+    Http401Response:
+        type: object
+        properties:
+          error:
+            type: string
+            maxLength: 255
+            example: Invalid access token
+          error_description:
+            type: string
+            maxLength: 255
+            example: invalid access token
+    
+    Http403Response:
+        type: object
+        properties:
+          error:
+            type: string
+            maxLength: 255
+            example: Unauthorized
+          error_description:
+            type: string
+            maxLength: 255
+            example: Unauthorized access
+            
+    Bill:
+        type: object
+        properties:
+          billRef:
+            type: string
+            maxLength: 255
+            description: Unique indentifier of the bill
+          createtime:
+            type: string
+            format: timestamp
+            example: 1490109044
+            description: the date at which the bill was created in the biller's system
+          dueTime:
+            type: string
+            format: timestamp
+            example: 1490109044
+            description: If bill is not paid before this date, some penalities may be applied (Penalities are implicitly part of the bill amount)
+          dueAmount:
+            type: number
+            format: int64
+            example: 50000
+            description: The bill amount
+          currency:
+            type: string
+            example: "950"
+            enum:
+              - "950"
+          status:
+            type: string
+            example: "U"
+            enum:
+              - U
+              - P
+            description: The bill state
+            
+    Payment:
+        type: object
+        properties:
+          acquirertrxref:
+            type: string
+            maxLength: 20
+            example: CI20230929.1506.ADFDF
+          vouchercode:
+            type: string
+            minLength: 12
+            maxLength: 12
+            example: ack67fje4598
+          pointofservice:
+            type: string
+            maxLength: 20
+            example: POS002
+          rejectmessage:
+            type: string
+            maxLength: 255
+          dstaccounts:
+            type: array
+            maxLength: 1
+            minLength: 1
+            items:
+              type: object
+              $ref: '#/components/schemas/AccountInfo'
+          srcaccounts:
+            type: array
+            maxLength: 1
+            minLength: 1
+            items:
+              type: object
+              $ref: '#/components/schemas/AccountInfo'
+          teller:
+            type: string
+            maxLength: 20
+            example: MERCH0001
+          state:
+            type: string
+            enum:
+              - ACCEPTED
+              - REJECTED
+              - PENDING
+              - REVERSED
+              - EXPIRED
+              - CANCELLED
+          sendercustomerdata:
+            $ref: '#/components/schemas/CustomerData'
+          receivercustomerdata:
+            $ref: '#/components/schemas/CustomerData'
+          issuertrxref:
+            type: integer
+            format: integer
+            example: 1234578999
+            maxLength: 20
+          intent:
+            type: string
+            enum:
+              - mobile_transfer
+              - merchant_purchase
+              - inc_wal_remit
+              - cardless_withdrawal
+              - bill_inquiry
+              - bill_payment
+              - cash_out
+              - purchase_voucher
+              - pp_reload
+              - inc_acc_remit
+              - inc_card_remit
+              - inc_voucher_remit
+              - outg_acc_remit
+              - outg_card_remit
+              - outg_wal_remit
+              - outg_voucher_remit
+              - cash_deposit
+              - cash_in
+              - wallet_to_account
+              - account_to_wallet
+              - account_transfer
+              - wallet_to_account
+              - request_to_pay
+              - account_inquiry
+          createtime:
+            type: string
+            format: timestamp
+            example: 1490109044
+          description:
+            type: string
+            maxLength: 255
+            example: Remboursement Christian
+          amount:
+            type: number
+            format: int64
+            example: 50000
+          tomember:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: 12002
+            description: Only return payments sent to this member
+          frommember:
+            type: string
+            minLength: 5
+            maxLength: 5
+            example: 12002
+            description: Only return payments issued by this member
+          fromdate:
+            type: string
+            format: timestamp
+            example: 1490109044
+            description: Only return payments starting from this date
+          todate:
+            type: string
+            format: timestamp
+            example: 1490109044
+            description: Only return payments created before this date
+      
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+  securitySchemes:
+    gimac_pay_auth:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: http://localhost:8005/stdendpointfacade/v1/external/oauth/token
+          scopes:
+            read: read

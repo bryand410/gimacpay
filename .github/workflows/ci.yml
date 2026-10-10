@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        include:
+          # One run on Windows, because the package advertises OS independence
+          # and the development machine is Windows.
+          - os: windows-latest
+            python-version: "3.13"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the package and its development tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Test
+        run: pytest -q
+
+      - name: Check the formatting of the public API
+        run: ruff format --check .
+
+  no-dependencies:
+    name: Prove there are no runtime dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install only the package, with no extras
+        run: pip install .
+
+      - name: Import with site-packages disabled
+        run: |
+          # -S removes site-packages from sys.path, so this import can only
+          # succeed through PYTHONPATH=src. If the package imported anything
+          # third-party, it would fail here -- that is the proof.
+          PYTHONPATH=src python -S -c "import gimacpay; print('gimacpay', gimacpay.__version__)"
+
+      - name: Assert the dependency list is empty
+        run: |
+          python - <<'PY'
+          import importlib.metadata as md
+          requires = md.requires("gimacpay") or []
+          runtime = [r for r in requires if "extra ==" not in r]
+          assert not runtime, f"runtime dependencies found: {runtime}"
+          print("no runtime dependencies declared")
+          PY
