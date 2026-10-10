@@ -22,11 +22,23 @@ spécification publiée *GIMACPay Swagger for payments issuers* version 1.8.
 
 ## Installation
 
+**Pas encore sur PyPI.** La spécification de GIMAC porte `license: Private` ; une demande
+d'autorisation est en cours. En attendant, installez depuis le dépôt :
+
 ```bash
-pip install gimacpay
+pip install "git+https://github.com/bryand410/gimacpay@main"
+```
+
+ou, hors ligne :
+
+```bash
+git clone https://github.com/bryand410/gimacpay
+pip install ./gimacpay
 ```
 
 Python 3.9 ou plus. **Aucune dépendance.**
+
+Une fois l'accord obtenu, ce sera `pip install gimacpay`.
 
 ---
 
@@ -219,8 +231,12 @@ Voir [SECURITY.md](SECURITY.md).
 
 ## Ce que la spécification ne dit pas
 
-Deux incohérences trouvées en écrivant cette bibliothèque, verrouillées par des tests
-plutôt que laissées en commentaires :
+Six points relevés en écrivant cette bibliothèque, écrits en détail dans
+**[docs/2026-10-gimacpay-specification-findings.md](docs/2026-10-gimacpay-specification-findings.md)** —
+le document à lire si vous intégrez GIMACPAY et que quelque chose ne colle pas.
+
+En résumé, deux d'entre eux sont de vraies erreurs, verrouillées par des tests plutôt que
+laissées en commentaires :
 
 1. **`mobile_reload` manque à l'énumération `Payment.intent`.** Le schéma
    `MobileReloadRequest` figure bien dans le `oneOf` de `/payment/send`, et
@@ -231,15 +247,11 @@ plutôt que laissées en commentaires :
 
 Si GIMAC corrige l'un ou l'autre, `tests/test_intents.py` échoue et le dit.
 
-Trois autres points relevés, sans être des bugs :
-
-- `Payment.issuertrxref` est typé `integer`, mais **tous** les exemples envoient une chaîne.
-  La bibliothèque convertit en `str` à la frontière.
-- `receivercustomerdata` / `sendercustomerdata` sont typés `object`, mais les exemples
-  envoient un tableau d'un élément. Les deux formes sont acceptées.
-- La réponse 200 de `/payment/update` est typée `Http400Response` (une paire
-  `error` / `error_description`), ce qui ressemble à une erreur de documentation.
-  La méthode renvoie donc le corps brut plutôt que de deviner.
+Quatre autres incohérences, détaillées dans le document : `issuertrxref` typé `integer` alors
+que tous les exemples envoient une chaîne (dont une de 19 chiffres, hors du domaine exact
+d'un flottant 64 bits) ; `receivercustomerdata` / `sendercustomerdata` typés `object` mais
+envoyés comme tableau d'un élément ; `maxLength` / `minLength` sur des tableaux au lieu de
+`maxItems` / `minItems` ; et la réponse 200 de `/payment/update` typée `Http400Response`.
 
 ---
 
