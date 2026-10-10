@@ -3,6 +3,9 @@
 *What I found implementing the CEMAC interbank payment API — and what a participant
 would get wrong without knowing it.*
 
+> **Version française :**
+> [2026-10-gimacpay-specification-findings.fr.md](2026-10-gimacpay-specification-findings.fr.md)
+
 ---
 
 GIMACPAY is the interbank payment network for Central Africa. It is operated by GIMAC

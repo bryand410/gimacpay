@@ -232,8 +232,9 @@ Voir [SECURITY.md](SECURITY.md).
 ## Ce que la spécification ne dit pas
 
 Six points relevés en écrivant cette bibliothèque, écrits en détail dans
-**[docs/2026-10-gimacpay-specification-findings.md](docs/2026-10-gimacpay-specification-findings.md)** —
+**[docs/2026-10-gimacpay-specification-findings.fr.md](docs/2026-10-gimacpay-specification-findings.fr.md)** —
 le document à lire si vous intégrez GIMACPAY et que quelque chose ne colle pas.
+Version anglaise : [docs/2026-10-gimacpay-specification-findings.md](docs/2026-10-gimacpay-specification-findings.md).
 
 En résumé, deux d'entre eux sont de vraies erreurs, verrouillées par des tests plutôt que
 laissées en commentaires :
