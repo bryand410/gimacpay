@@ -58,9 +58,7 @@ with zipfile.ZipFile(WHEEL) as zf:
     ]
     check("no runtime dependencies", not runtime, ", ".join(runtime))
 
-    extras = [
-        line for line in metadata.splitlines() if line.startswith("Requires-Dist:")
-    ]
+    extras = [line for line in metadata.splitlines() if line.startswith("Requires-Dist:")]
     print(f"  declared requirements (all extras): {len(extras)}")
 
 print()
