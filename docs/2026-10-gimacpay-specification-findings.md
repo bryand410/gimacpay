@@ -1,4 +1,4 @@
-# Five things the GIMACPay specification does not tell you
+# Six things the GIMACPay specification does not tell you
 
 *What I found implementing the CEMAC interbank payment API — and what a participant
 would get wrong without knowing it.*
